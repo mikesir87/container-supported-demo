@@ -11,7 +11,7 @@ describe("Product creation", () => {
 
     productService = require("../src/services/ProductService");
     publisherService = require("../src/services/PublisherService");
-  }, 60000);
+  }, 120000); // Making this very long in case the images need to be pulled
   
   afterAll(async () => {
     await productService.teardown();
