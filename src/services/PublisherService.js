@@ -1,19 +1,32 @@
 const { Kafka, Partitioners } = require('kafkajs')
 
-const BROKER_URLS = (process.env.KAFKA_BOOTSTRAP_SERVERS || "localhost:9092").split(",");
-
-const kafka = new Kafka({
-  clientId: 'catalog-service',
-  brokers: BROKER_URLS
-});
-
 let producer;
 
-async function publishEvent(topic, event) {
-  if (!producer) {
-    producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner });
-    await producer.connect();
+async function getProducer() {
+  if (producer) {
+    return producer;
   }
+
+  const BROKER_URLS = (process.env.KAFKA_BOOTSTRAP_SERVERS || "localhost:9092").split(",");
+
+  const kafka = new Kafka({
+    clientId: 'catalog-service',
+    brokers: BROKER_URLS
+  });
+  
+  producer = kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner });
+  await producer.connect();
+  return producer;
+}
+
+async function teardown() {
+  if (producer) {
+    await producer.disconnect();
+  }
+}
+
+async function publishEvent(topic, event) {
+  const producer = await getProducer();
 
   await producer.send({
     topic,
@@ -25,4 +38,5 @@ async function publishEvent(topic, event) {
 
 module.exports = {
   publishEvent,
+  teardown,
 };

@@ -14,6 +14,12 @@ async function getClient() {
   return client;
 }
 
+async function teardown() {
+  if (client) {
+    await client.end();
+  }
+}
+
 async function createProduct(product) {
   const client = await getClient();
 
@@ -21,7 +27,7 @@ async function createProduct(product) {
   const newProductId = result.rows[0].id;
 
   publishEvent("products", { 
-    action: "product_created",
+    action: "product_createdd",
     id: newProductId, 
     name: product.name, 
     price: product.price 
@@ -58,4 +64,5 @@ module.exports = {
   createProduct,
   getProductById,
   uploadProductImage,
+  teardown,
 };

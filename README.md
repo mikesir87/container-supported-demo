@@ -16,12 +16,17 @@ This project is configured to run with the app running either natively (using No
     docker compose up
     ```
 
-3. Install the app dependencies and start the main app
+3. Install the app dependencies and start the main app with the following command:
 
     ```console
     yarn install
     yarn dev
     ```
+
+#### Debugging the application
+
+Once the app is running, you can start a debug session by using the **Debug** task in the "Run and Debug" panel. 
+
 
 ### Running completely in containers
 
@@ -35,7 +40,21 @@ The code is currently mounted into the app container, theoretically allowing for
     docker compose -f compose.native.yaml
     ```
 
-## Utilities
+
+### Running tests
+
+This project contains a few sample tests to demonstrate Testcontainer integration. To run them, follow these steps (assuming you're using Visual Studio Code):
+
+1. Download and install the [Jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest#user-interface).
+
+2. Open the "Testing" tab in the left-hand navigation (looks like a flask).
+
+3. Press play for the test you'd like to run.
+
+The *.integration.spec.js tests will use Testcontainers to launch Kafka and Postgres.
+
+
+## Additional utilities
 
 Once the development environment is up and running, the following URLs can be leveraged:
 
