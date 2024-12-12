@@ -106,3 +106,53 @@ The `compose.traefik.*` variants make the previous accessible using hostnames, i
 ### Helper scripts
 
 In the `dev/scripts` directory, there are a few scripts that can be used to interact with the REST API of the application.
+
+#### Create the product
+
+```
+cd src/dev/
+chmod +x create-product.sh
+./create-product.sh 1
+{"name":"Test product","upc":"100000000001","price":150,"id":1}%
+```
+
+
+#### Get the product
+
+If you run the script, the provided output seems to be a combination of the cURL command and the response from the catalog service.
+Let's modify it so as to just get the result.
+
+```
+#!/bin/bash
+
+id=$1
+
+if [ -z "$id" ]; then
+  echo "id is not set. Exiting..."
+  exit 1
+fi
+
+response=$(curl -s "http://localhost:3000/api/products/${id}")
+
+if echo "$response" | jq -e '.inventory.error' &>/dev/null; then
+  error_message=$(echo "$response" | jq -r '.inventory.message')
+  echo "Error: $error_message"
+else
+  echo "Product details:"
+  echo "$response" | jq -r '. | del(.inventory)'
+fi
+```
+
+```
+./create-product.sh 2
+{"name":"Test product","upc":"100000000002","price":150,"id":2}%
+ajeetsraina  scripts  ➜ ( main)  ♥ 20:39  ./get-product.sh 2
+Product details:
+{
+  "id": 2,
+  "name": "Test product",
+  "upc": "100000000002",
+  "price": "150.00"
+}
+```
+
