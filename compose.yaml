@@ -1,10 +1,27 @@
 services:
+  ############## THE APP ITSELF ##############
+  app:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/usr/local/app
+    ports:
+      - 3000:3000
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://aws:4566
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      INVENTORY_SERVICE_BASE_URL: http://mock-inventory:8080
+      PGHOST: postgres
 
   ############## DATABASE AND VISUALIZER ##############
   postgres:
     image: postgres:17.1
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     volumes:
       - ./dev/db:/docker-entrypoint-initdb.d
     environment:
@@ -22,7 +39,6 @@ services:
       PGADMIN_DEFAULT_EMAIL: pgadmin@mycomp.com
       PGADMIN_DEFAULT_PASSWORD: secret
       PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     depends_on:
       - postgres
 
@@ -31,22 +47,26 @@ services:
     image: localstack/localstack:3.8.1
     ports:
       - "4566:4566"
-    post_start:
-      - command: awslocal s3api create-bucket --bucket product-images
+
+  bucket-creator:
+    image: localstack/localstack:3.8.1
+    entrypoint: []
+    command: awslocal --endpoint-url http://aws:4566 s3api create-bucket --bucket product-images
+    depends_on:
+      aws:
+        condition: service_healthy
 
   ############## MOCK INVENTORY SERVICE ##############
   mock-inventory:
     image: wiremock/wiremock:3.9.2
-    ports:
-      - 8090:8080
+    # ports:
+    #   - 8090:8080
     volumes:
       - ./dev/inventory-mocks:/home/wiremock
 
   ############## KAFKA AND VISUALIZATION ##############
   kafka:
     image: apache/kafka-native:3.9.0
-    ports:
-      - 9092:9092
     environment:
       # Configure listeners for both docker and host communication
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093

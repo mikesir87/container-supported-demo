@@ -23,9 +23,17 @@ async function teardown() {
 async function createProduct(product) {
   const client = await getClient();
 
+  const existingProduct = await client.query(
+    "SELECT * FROM products WHERE upc = $1",
+    [product.upc],
+  );
+
+  if (existingProduct.rows.length > 0)
+    throw new Error("Product with this UPC already exists");
+
   const result = await client.query(
-    "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING id",
-    [product.name, product.price],
+    "INSERT INTO products (name, upc, price) VALUES ($1, $2, $3) RETURNING id",
+    [product.name, product.upc, product.price],
   );
   const newProductId = result.rows[0].id;
 
@@ -33,6 +41,7 @@ async function createProduct(product) {
     action: "product_created",
     id: newProductId,
     name: product.name,
+    upc: product.upc,
     price: product.price,
   });
 
@@ -48,13 +57,15 @@ async function getProductById(id) {
   const result = await client.query("SELECT * FROM products WHERE id = $1", [
     id,
   ]);
+
   if (result.rows.length === 0) {
     return null;
   }
 
   const product = result.rows[0];
 
-  const inventory = await getInventoryForProduct(id);
+  const inventory = await getInventoryForProduct(product.upc);
+
   return {
     inventory,
     ...product,

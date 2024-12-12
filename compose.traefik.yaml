@@ -8,11 +8,27 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
+  ############## THE APP ITSELF ##############
+  app:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/usr/local/app
+    ports:
+      - 3000:3000
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://aws:4566
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      INVENTORY_SERVICE_BASE_URL: http://mock-inventory:8080
+      PGHOST: postgres
+
   ############## DATABASE AND VISUALIZER ##############
   postgres:
     image: postgres:17.1
-    ports:
-      - "5432:5432"
     volumes:
       - ./dev/db:/docker-entrypoint-initdb.d
     environment:
@@ -20,10 +36,6 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: catalog
 
-  ######## DATABASE VISUALIZER ##########
-  # The natively-running app will connect to this using the endpoint 
-  # http://db.localhost
-  #######################################
   pgadmin:
     image: dpage/pgadmin4:8.13.0
     volumes:
@@ -35,13 +47,10 @@ services:
     depends_on:
       - postgres
     labels:
-      traefik.http.routers.pgadmin.rule: Host(`db.localhost`)
+      traefik.http.routers.pgadmin.rule: Host(`pgadmin.localhost`)
       traefik.http.services.pgadmin.loadbalancer.server.port: 80
 
   ############## LOCAL AWS ##############
-  # The natively-running app will connect to this using the endpoint 
-  # http://aws.localhost
-  #######################################
   aws:
     image: localstack/localstack:3.8.1
     labels:
@@ -57,9 +66,6 @@ services:
         condition: service_healthy
 
   ############## MOCK INVENTORY SERVICE ##############
-  # The natively-running app will connect to this using the endpoint 
-  # http://inventory.localhost
-  #######################################
   mock-inventory:
     image: wiremock/wiremock:3.9.2
     volumes:
@@ -71,8 +77,6 @@ services:
   ############## KAFKA AND VISUALIZATION ##############
   kafka:
     image: apache/kafka-native:3.9.0
-    ports:
-      - 9092:9092
     environment:
       # Configure listeners for both docker and host communication
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
@@ -97,10 +101,6 @@ services:
     depends_on:
       - kafka
 
-  ############## KAFKA UI ##############
-  # The natively-running app will connect to this using the endpoint 
-  # http://kafka.localhost
-  #######################################
   kafka-ui:
     image: ghcr.io/kafbat/kafka-ui:01aa8ab36387c5f1d66d098e71488bfb0eb5f39c
     environment:

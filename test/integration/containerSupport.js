@@ -25,7 +25,7 @@ async function createAndBootstrapPostgresContainer() {
 }
 
 async function createAndBootstrapKafkaContainer() {
-  const kafkaContainer = await new KafkaContainer()
+  const kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.8.0")
     .withKraft()
     .withExposedPorts(9093)
     .start();

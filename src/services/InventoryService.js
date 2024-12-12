@@ -4,7 +4,7 @@ const BASE_URL = process.env.INVENTORY_SERVICE_BASE_URL;
 
 async function getInventoryForProduct(productId) {
   try {
-    const response = await fetch(`${BASE_URL}/api/inventory/${productId}`);
+    const response = await fetch(`${BASE_URL}/api/inventory?upc=${productId}`);
     if (response.status === 404) {
       return {
         error: true,

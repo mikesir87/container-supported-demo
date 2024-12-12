@@ -50,6 +50,7 @@ describe("Product creation", () => {
     const product = await productService.createProduct({
       name: "Test Product",
       price: 100,
+      upc: "100000000001",
     });
 
     expect(product.id).toBeDefined();
@@ -69,11 +70,13 @@ describe("Product creation", () => {
     createdProduct = await productService.createProduct({
       name: "Kafka publishing test",
       price: 100,
+      upc: "100000000002",
     });
 
     expect(createdProduct.id).toBeDefined();
     expect(createdProduct.name).toBe("Kafka publishing test");
     expect(createdProduct.price).toBe(100);
+    expect(createdProduct.upc).toBe("100000000002");
 
     await kafkaConsumer.waitForMessage({
       id: createdProduct.id,
@@ -94,4 +97,20 @@ describe("Product creation", () => {
       filename: "test.jpg",
     });
   }, 15000);
+
+  it("doesn't allow duplicate UPCs", async () => {
+    await productService.createProduct({
+      name: "Kafka publishing test",
+      price: 100,
+      upc: "100000000003",
+    });
+
+    await expect(
+      productService.createProduct({
+        name: "Kafka publishing test",
+        price: 100,
+        upc: "100000000003",
+      }),
+    ).rejects.toThrow("Product with this UPC already exists");
+  });
 });

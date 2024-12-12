@@ -6,6 +6,8 @@ This repo is a demo project that demonstrates all of Docker's services in a sing
 - Integration testing with Testcontainers
 - Building in GitHub Actions with Docker Build Cloud
 
+This project is also setup to be used for various demos. Learn more about the demo setups by using [the README in the ./demo directory](./demo/README.md).
+
 ## Application architecture
 
 This sample app provides an API that utilizes the following setup:
@@ -26,45 +28,44 @@ During development, containers provide the following services:
 
 ![Dev environment architecture](./dev-environment-architecture.png)
 
-
 ## Trying it out
 
-This project is configured to run with the app running either natively (using Node installed on the machine) or in a container.
+This project is configured to run with the app running in a container or natively (using Node installed on the machine).
 
-### Running natively
+### Developing with everything in containers
+
+The `compose.yaml` file defines an `app` service that will run the application in the container.
+
+The code is currently mounted into the app container, theoretically allowing for hot reloading. However, there is a limitation for WSL environments where the filesystem event isn't propagated, preventing nodemon from seeing the file change event.
+
+1. Start the app using Compose.
+
+   ```console
+   docker compose up -d
+   ```
+
+### Developing with the app running natively
+
+Alternatively, you can start the application by running the app natively on your machine and connecting to the app dependencies that are running in containers.
 
 1. Ensure you have Node and yarn installed on your machine.
 
 2. Start all of the application dependencies
 
-    ```console
-    docker compose up
-    ```
+   ```console
+   docker compose -f compose.native.yaml up
+   ```
 
 3. Install the app dependencies and start the main app with the following command:
 
-    ```console
-    yarn install
-    yarn dev
-    ```
+   ```console
+   yarn install
+   yarn dev
+   ```
 
 #### Debugging the application
 
-Once the app is running, you can start a debug session by using the **Debug** task in the "Run and Debug" panel. 
-
-
-### Running completely in containers
-
-The `compose.native.yaml` file defines an additional `app` service that will run the application in the container. 
-
-The code is currently mounted into the app container, theoretically allowing for hot reloading. However, there is a limitation for WSL environments where the filesystem event isn't propagated, preventing nodemon from seeing the file change event.
-
-1. Start the app using Compose, but specifying the native file
-
-    ```console
-    docker compose -f compose.native.yaml
-    ```
-
+Once the app is running, you can start a debug session by using the **Debug** task in the "Run and Debug" panel. This currently only works when the app is running natively on the machine.
 
 ### Running tests
 
@@ -76,7 +77,7 @@ This project contains a few sample tests to demonstrate Testcontainer integratio
 
 3. Press play for the test you'd like to run.
 
-The *.integration.spec.js tests will use Testcontainers to launch Kafka, Postgres, and LocalStack.
+The \*.integration.spec.js tests will use Testcontainers to launch Kafka, Postgres, and LocalStack.
 
 #### Running tests via the command line
 
@@ -94,7 +95,7 @@ $ yarn integration-test
 
 Once the development environment is up and running, the following URLs can be leveraged:
 
-- [http://localhost:5050](http://localhost:5050) - [pgAdmin](https://www.pgadmin.org/) to visualize the database
+- [http://localhost:5050](http://localhost:5050) - [pgAdmin](https://www.pgadmin.org/) to visualize the database. Login using the password `postgres` (configured in the Compose file)
 - [http://localhost:8080](http://localhost:8080) - [kafbat](https://github.com/kafbat/kafka-ui) to visualize the Kafka cluster
 
 The `compose.traefik.*` variants make the previous accessible using hostnames, instead of hard-to-remember ports.

@@ -14,12 +14,16 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/products", async (req, res) => {
-  const newProduct = await ProductService.createProduct(req.body);
+  try {
+    const newProduct = await ProductService.createProduct(req.body);
 
-  res
-    .status(201)
-    .header("Location", `/api/products/${newProduct.id}`)
-    .json(newProduct);
+    res
+      .status(201)
+      .header("Location", `/api/products/${newProduct.id}`)
+      .json(newProduct);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 app.get("/api/products/:id", async (req, res) => {

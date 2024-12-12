@@ -1,0 +1,38 @@
+name: Validate demo patches
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    name: "Define demo patch matrix"
+    runs-on: ubuntu-latest
+    outputs:
+      patchFiles: ${{ steps.extract.outputs.patchFiles }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract patches
+        id: extract
+        run: |
+          patchFiles=`ls demo/*.patch | jq -R '.' | jq -sc .`
+          echo "patchFiles=${patchFiles}" >> "$GITHUB_OUTPUT"
+
+  validate:
+    runs-on: ubuntu-latest
+    needs: extract
+    strategy:
+      matrix:
+        patchFile: ${{ fromJSON(needs.extract.outputs.patchFiles) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Apply patch file
+        run: |
+          git apply "$patchFile"
+        env:
+          patchFile: ${{ matrix.patchFile }}
