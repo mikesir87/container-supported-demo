@@ -156,3 +156,9 @@ Product details:
 }
 ```
 
+## Upload the image
+
+```
+./upload-file.sh 2
+{"action":"image_uploaded","product_id":"2","filename":"2.png"}%
+```
