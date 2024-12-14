@@ -110,7 +110,7 @@ In the `dev/scripts` directory, there are a few scripts that can be used to inte
 #### Create the product
 
 ```
-cd src/dev/
+cd /dev/scripts
 chmod +x create-product.sh
 ./create-product.sh 1
 {"name":"Test product","upc":"100000000001","price":150,"id":1}%
