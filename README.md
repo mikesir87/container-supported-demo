@@ -114,39 +114,23 @@ cd dev/scripts
 chmod +x create-product.sh
 ./create-product.sh 1
 {"name":"Test product","upc":"100000000001","price":150,"id":1}%
+./create-product.sh 2
+{"name":"Test product","upc":"100000000002","price":150,"id":2}%
+./create-product.sh 3
+{"name":"Test product","upc":"100000000003","price":150,"id":3}%
+./create-product.sh 4
+{"name":"Test product","upc":"100000000004","price":150,"id":4}%
 ```
-
 
 #### Get the product
 
 If you run the script, the provided output seems to be a combination of the cURL command and the response from the catalog service.
 Let's modify it so as to just get the result.
 
-```
-#!/bin/bash
 
-id=$1
-
-if [ -z "$id" ]; then
-  echo "id is not set. Exiting..."
-  exit 1
-fi
-
-response=$(curl -s "http://localhost:3000/api/products/${id}")
-
-if echo "$response" | jq -e '.inventory.error' &>/dev/null; then
-  error_message=$(echo "$response" | jq -r '.inventory.message')
-  echo "Error: $error_message"
-else
-  echo "Product details:"
-  echo "$response" | jq -r '. | del(.inventory)'
-fi
-```
 
 ```
-./create-product.sh 2
-{"name":"Test product","upc":"100000000002","price":150,"id":2}%
-ajeetsraina  scripts  ➜ ( main)  ♥ 20:39  ./get-product.sh 2
+./get-product.sh 2
 Product details:
 {
   "id": 2,
@@ -162,3 +146,10 @@ Product details:
 ./upload-file.sh 2
 {"action":"image_uploaded","product_id":"2","filename":"2.png"}%
 ```
+
+## Verifying it under Kafkabat
+
+
+
+<img width="1499" alt="image" src="https://github.com/user-attachments/assets/d5df39e6-0c21-438f-b2fd-263a2af8de3b" />
+
