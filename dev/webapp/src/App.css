@@ -1,0 +1,23 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table thead tr th {
+  border-bottom: 1px solid #ccc;
+}
+
+table tbody td {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+td img {
+  max-height: 60px;
+}

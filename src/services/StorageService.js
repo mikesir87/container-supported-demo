@@ -1,4 +1,8 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require("@aws-sdk/client-s3");
 const { publishEvent } = require("./PublisherService");
 
 const s3Client = new S3Client({
@@ -8,16 +12,29 @@ const s3Client = new S3Client({
 
 const BUCKET_NAME = process.env.PRODUCT_IMAGE_BUCKET_NAME || "product-images";
 
-async function uploadFile(id, name, buffer) {
+async function getFile(id) {
+  const name = "product.png";
+
   const result = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: `${id}/${name}`,
+    }),
+  );
+
+  return result.Body;
+}
+
+async function uploadFile(id, buffer) {
+  const name = "product.png";
+
+  await s3Client.send(
     new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: `${id}/${name}`,
       Body: buffer,
     }),
   );
-
-  console.log(`Successfully uploaded file to S3 with key ${name}`, result);
 
   const details = {
     action: "image_uploaded",
@@ -32,4 +49,5 @@ async function uploadFile(id, name, buffer) {
 
 module.exports = {
   uploadFile,
+  getFile,
 };

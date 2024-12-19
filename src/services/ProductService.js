@@ -1,7 +1,7 @@
 const { Client } = require("pg");
 
 const { getInventoryForProduct } = require("./InventoryService");
-const { uploadFile } = require("./StorageService");
+const { uploadFile, getFile } = require("./StorageService");
 const { publishEvent } = require("./PublisherService");
 
 let client;
@@ -18,6 +18,14 @@ async function teardown() {
   if (client) {
     await client.end();
   }
+}
+
+async function getProducts() {
+  const client = await getClient();
+
+  const result = await client.query("SELECT * FROM products ORDER BY id ASC");
+
+  return result.rows;
 }
 
 async function createProduct(product) {
@@ -72,13 +80,22 @@ async function getProductById(id) {
   };
 }
 
-async function uploadProductImage(id, filename, buffer) {
-  return uploadFile(id, filename, buffer);
+async function getProductImage(id) {
+  return getFile(id);
+}
+
+async function uploadProductImage(id, buffer) {
+  const client = await getClient();
+
+  await uploadFile(id, buffer);
+  await client.query("UPDATE products SET has_image=TRUE WHERE id=$1", [id]);
 }
 
 module.exports = {
+  getProducts,
   createProduct,
   getProductById,
+  getProductImage,
   uploadProductImage,
   teardown,
 };

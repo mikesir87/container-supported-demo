@@ -1,3 +1,4 @@
+const fs = require("fs");
 const {
   createAndBootstrapPostgresContainer,
   createAndBootstrapKafkaContainer,
@@ -85,17 +86,38 @@ describe("Product creation", () => {
   }, 15000);
 
   it("should upload a file correctly", async () => {
-    createdProduct = await productService.uploadProductImage(
-      "123",
-      "test.jpg",
-      Buffer.from("test"),
-    );
+    createdProduct = await productService.createProduct({
+      name: "Kafka publishing test",
+      price: 100,
+      upc: "100000000004",
+    });
+
+    const imageBuffer = fs.readFileSync("dev/scripts/product-image.png");
+
+    await productService.uploadProductImage(createdProduct.id, imageBuffer);
 
     await kafkaConsumer.waitForMessage({
       action: "image_uploaded",
-      product_id: "123",
-      filename: "test.jpg",
+      product_id: createdProduct.id,
+      filename: "product.png",
     });
+
+    const retrievedImageStream = await productService.getProductImage(
+      createdProduct.id,
+    );
+
+    const retrievedImageBuffer = await (() =>
+      new Promise((acc) => {
+        var bufs = [];
+        retrievedImageStream.on("data", function (d) {
+          bufs.push(d);
+        });
+        retrievedImageStream.on("end", function () {
+          acc(Buffer.concat(bufs));
+        });
+      }))();
+
+    expect(retrievedImageBuffer).toEqual(imageBuffer);
   }, 15000);
 
   it("doesn't allow duplicate UPCs", async () => {

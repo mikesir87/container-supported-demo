@@ -7,4 +7,4 @@ if [ -z "$id" ]; then
   exit 1
 fi
 
-curl -F "file=@docker-logo-blue.png" "http://localhost:3000/api/products/${id}/image"
+curl -F "file=@product-image.png" "http://localhost:3000/api/products/${id}/image"

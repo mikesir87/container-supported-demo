@@ -49,6 +49,8 @@ To start the app, follow these steps:
    yarn dev
    ```
 
+4. Once everything is up and running, you can open the demo client at http://localhost:5173
+
 ### Debugging the application
 
 The project contains configuration for VS Code to enable quick debgging. Once the app is running, you can start a debug session by using the **Debug** task in the "Run and Debug" panel. This currently only works when the app is running natively on the machine.
@@ -84,6 +86,7 @@ $ yarn integration-test
 
 Once the development environment is up and running, the following URLs can be leveraged:
 
+- [http://localhost:5173](http://localhost:5173) - a simple React app that provides the ability to interact with the API via a web interface (helpful during demos)
 - [http://localhost:5050](http://localhost:5050) - [pgAdmin](https://www.pgadmin.org/) to visualize the database. Login using the password `postgres` (configured in the Compose file)
 - [http://localhost:8080](http://localhost:8080) - [kafbat](https://github.com/kafbat/kafka-ui) to visualize the Kafka cluster
 

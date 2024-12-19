@@ -1,4 +1,12 @@
 services:
+  demo-client:
+    image: node:lts-slim
+    working_dir: /usr/local/app
+    command: yarn dev
+    ports:
+      - 5173:5173
+    volumes:
+      - ./dev/webapp:/usr/local/app
 
   ############## DATABASE AND VISUALIZER ##############
   postgres:

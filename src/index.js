@@ -13,6 +13,11 @@ app.get("/", (req, res) => {
   res.send("Hello World!!!");
 });
 
+app.get("/api/products", async (req, res) => {
+  const products = await ProductService.getProducts();
+  res.json(products);
+});
+
 app.post("/api/products", async (req, res) => {
   try {
     const newProduct = await ProductService.createProduct(req.body);
@@ -37,14 +42,28 @@ app.get("/api/products/:id", async (req, res) => {
   res.json(product);
 });
 
-app.post("/api/products/:id/image", upload.single("file"), async (req, res) => {
-  const filename = req.file.originalname;
-  const extn = filename.split(".").pop();
-  const imageName = `${req.params.id}.${extn}`;
+app.get("/api/products/:id/image", async (req, res) => {
+  const product = await ProductService.getProductById(req.params.id);
 
+  if (!product) {
+    res.status(404).send();
+    return;
+  }
+
+  const imageStream = await ProductService.getProductImage(req.params.id);
+
+  if (!imageStream) {
+    res.status(404).send();
+    return;
+  }
+
+  res.contentType("image/png");
+  imageStream.pipe(res);
+});
+
+app.post("/api/products/:id/image", upload.single("file"), async (req, res) => {
   const product = await ProductService.uploadProductImage(
     req.params.id,
-    imageName,
     fs.readFileSync(req.file.path),
   );
 

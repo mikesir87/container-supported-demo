@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon --inspect src/index.js",
+    "dev": "nodemon --inspect src/index.js --ignore dev",
     "dev-container": "nodemon src/index.js",
     "prettier": "prettier --write \"**/*.js\"",
     "prettier-check": "prettier --check \"**/*.js\"",
